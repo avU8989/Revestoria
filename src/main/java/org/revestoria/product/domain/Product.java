@@ -1,7 +1,8 @@
 package org.revestoria.product.domain;
 
-import org.revestoria.core.shared.Money;
+import org.revestoria.core.shared.domain.Money;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +31,12 @@ public class Product {
 
     private final List<ProductImage> images = new ArrayList<>();
 
+    private final UUID sellerId;
     private Instant reservedUntil;
     private UUID reservedByUserId;
     private Instant publishedAt;
+
+    private final static Duration MAX_RESERVATION_DURATION = Duration.ofMinutes(15);
 
     public Product(
             UUID id,
@@ -46,11 +50,12 @@ public class Product {
             String color,
             String material,
             UUID categoryId,
+            UUID sellerId,
             Instant reservedUntil,
             UUID reservedByUserId,
             Instant publishedAt
     ) {
-        validateRequiredFields(id, price, productStatus, productCondition, title);
+        validateRequiredFields(id, price, productStatus, productCondition, title, sellerId);
 
         this.id = id;
         this.title = title;
@@ -63,30 +68,50 @@ public class Product {
         this.color = color;
         this.material = material;
         this.categoryId = categoryId;
+        this.sellerId = sellerId;
         this.reservedUntil = reservedUntil;
         this.reservedByUserId = reservedByUserId;
         this.publishedAt = publishedAt;
     }
 
-    private void validateRequiredFields(UUID id, Money price, ProductStatus status, ProductCondition condition, String title) {
+    private static void validateRequiredFields(
+            UUID id,
+            Money price,
+            ProductStatus status,
+            ProductCondition condition,
+            String title,
+            UUID sellerId
+    ) {
         if (id == null) {
             throw new IllegalArgumentException("Product id is required");
+        }
+
+        if (sellerId == null) {
+            throw new IllegalArgumentException("Product seller id is required");
+        }
+
+        if (status == null) {
+            throw new IllegalArgumentException("Product status is required");
+        }
+
+        validateDetails(title, price, condition);
+    }
+
+    private static void validateDetails(
+            String title,
+            Money price,
+            ProductCondition condition
+    ) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Product title is required");
         }
 
         if (price == null) {
             throw new IllegalArgumentException("Product price is required");
         }
 
-        if (status == null) {
-            throw new IllegalArgumentException("Product productStatus is required");
-        }
-
         if (condition == null) {
-            throw new IllegalArgumentException("Product productCondition is required");
-        }
-
-        if(title == null || title.isBlank()){
-            throw new IllegalArgumentException("Product title is required");
+            throw new IllegalArgumentException("Product condition is required");
         }
     }
 
@@ -119,6 +144,10 @@ public class Product {
 
         if (until == null || !until.isAfter(now)) {
             throw new IllegalArgumentException("Reservation time frame must be in the future");
+        }
+
+        if(until.isAfter(now.plus(MAX_RESERVATION_DURATION))){
+            throw new IllegalArgumentException("Reservation time frame is too long");
         }
 
         productStatus = ProductStatus.RESERVED;
@@ -174,7 +203,7 @@ public class Product {
             throw new IllegalStateException("Reserved or sold products cannot be edited");
         }
 
-        validateRequiredFields(id, price, productStatus, condition, title);
+        validateDetails(title, price, condition);
 
         this.title = title;
         this.description = description;
@@ -234,6 +263,8 @@ public class Product {
     public List<ProductImage> getImages() {
         return List.copyOf(images);
     }
+
+    public UUID getSellerId(){return this.sellerId;}
 
     public Instant getReservedUntil() {
         return reservedUntil;

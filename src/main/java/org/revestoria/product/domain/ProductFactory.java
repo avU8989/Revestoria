@@ -1,6 +1,6 @@
 package org.revestoria.product.domain;
 
-import org.revestoria.core.shared.Money;
+import org.revestoria.core.shared.domain.Money;
 
 import java.util.UUID;
 
@@ -14,7 +14,8 @@ public class ProductFactory {
             String size,
             String color,
             String material,
-            UUID categoryId
+            UUID categoryId,
+            UUID sellerId
     ){
         return new Product(
                 UUID.randomUUID(),
@@ -28,6 +29,7 @@ public class ProductFactory {
                 color,
                 material,
                 categoryId,
+                sellerId,
                 null,
                 null,
                 null

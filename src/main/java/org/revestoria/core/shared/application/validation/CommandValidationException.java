@@ -3,14 +3,14 @@ package org.revestoria.core.shared.application.validation;
 import java.util.List;
 
 public class CommandValidationException extends RuntimeException{
-    private final List<String> errors;
+    private final List<ValidationError> errors;
 
-    public CommandValidationException(List<String> errors) {
+    public CommandValidationException(List<ValidationError> errors) {
         super("Command validation failed");
         this.errors = errors;
     }
 
-    public List<String> getErrors() {
+    public List<ValidationError> getErrors() {
         return errors;
     }
 }

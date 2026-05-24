@@ -4,7 +4,9 @@ import org.revestoria.core.shared.domain.Money;
 import org.revestoria.product.domain.Product;
 import org.revestoria.product.domain.ProductCondition;
 import org.revestoria.product.domain.ProductStatus;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ProductPersistenceMapper {
 
     public ProductJpaEntity toJpa(Product product){
